@@ -55,35 +55,32 @@ public class Library {
         return Result.success("Book " + book.getTitle() + " is borrowed successfully by " + user.getEmail());
     }
 
-    public Result returnBook(@NonNull String userEmail, @NonNull Book book) {
+    public Result returnBook(@NonNull User user, @NonNull Book book) {
         ValidateUtils.requireNonNull(Map.ofEntries(
-                entry("userEmail", userEmail),
+                entry("user", user),
                 entry("book", book)
         ));
 
-//        Sprawdzenie czy książka jest poprawna
+        if (!user.getLoggedIn()) {
+            return Result.failure("User " +  user.getEmail() + " must be logged in to return books.");
+        }
+
+//        Sprawdzenie, czy książka jest poprawna
         if (!isBookCorrect(book)) {
-            return Result.failure("Book is not found in system");
+            return Result.failure("Book is not found in system.");
         }
 
-//        Pobieranie użytkownika z UserManager
-        Optional<User> optionalUser = userManager.getUserByEmail(userEmail);
-        if (optionalUser.isEmpty()) {
-            return Result.failure("User with email " + userEmail + " not found in system");
-        }
-
-        User user = optionalUser.get();
         /*
-        Na razie metoda ta jest zbędna, ponieważ znajdująca się w niej logika sprawdza czy użytkownik ma konto.
-        Ten sam efekt osiągamy w tym momencie mając optionalUser, który zwróci albo błąd gdy nie znalazł użytkownika
-        albo zwróci użytkownika który jest zarejestrowany i może zwracać książki.
-        W przyszłości jeżeli logika metody isUserCorrect się rozrośnie to będzie potrzeba przywrócenia tej metody
+        Na razie metoda ta jest zbędna, ponieważ znajdująca się w niej logika sprawdza, czy użytkownik ma konto.
+        Ten sam efekt osiągamy w tym momencie mając optionalUser, który zwróci albo błąd, gdy nie znalazł użytkownika,
+        albo zwróci użytkownika, który jest zarejestrowany i może zwracać książki.
+        W przyszłości, jeżeli logika metody isUserCorrect się rozrośnie to będzie potrzeba przywrócenia tej metody
         if (!isUserCorrect(user)) {
             return Result.failure("User is not found in system");
         }
          */
 
-//        Sprawdzenie czy użytkownik ma wypożyczoną tę książkę
+//        Sprawdzenie, czy użytkownik ma wypożyczoną tę książkę
         if (!user.getBorrowedBooks().contains(book)) {
             return Result.failure
                     ("User " + user.getEmail() + " does not have book " + book.getTitle() + " borrowed");
