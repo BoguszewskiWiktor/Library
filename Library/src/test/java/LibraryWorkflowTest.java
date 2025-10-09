@@ -1,4 +1,8 @@
-import org.example.*;
+import org.library.model.Book;
+import org.library.model.Result;
+import org.library.model.User;
+import org.library.service.Library;
+import org.library.service.UserManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +73,14 @@ public class LibraryWorkflowTest {
             System.out.printf
                     ("Amount of borrowed books by user: %s = %d%n", anna.getFullName(), anna.getBorrowedBooks().size());
         }
+
+//        Scenariusz 8: Zwrot książki, która jest już dostępna
+        Result result8 = library.returnBook(anna, null);
+        System.out.println("8. " + result8.getMessage());
+
+//        Scenariusz 9: Zwrot książki, która jest już dostępna
+        Result result9 = library.returnBook(null, book1);
+        System.out.println("9. " + result9.getMessage());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

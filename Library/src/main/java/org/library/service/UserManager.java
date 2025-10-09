@@ -1,6 +1,9 @@
-package org.example;
+package org.library.service;
 
 import lombok.NonNull;
+import org.library.util.ValidateUtils;
+import org.library.model.Result;
+import org.library.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

@@ -1,13 +1,19 @@
-package org.example;
+package org.library.service;
 
 import lombok.Data;
 import lombok.NonNull;
+import org.library.model.BookStatus;
+import org.library.util.ValidateUtils;
+import org.library.model.Book;
+import org.library.model.Result;
+import org.library.model.User;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Map.entry;
+import static org.library.util.ExceptionHandler.safeCall;
+import static org.library.util.ExceptionHandler.safeRun;
 
 
 @Data
@@ -16,7 +22,7 @@ public class Library {
     private final UserManager userManager;
     private static final int MAX_BORROW_LIMIT = 5;
 
-    public Result borrowBook(@NonNull User user, @NonNull Book book) {
+    public Result borrowBook(User user, Book book) {
         ValidateUtils.requireNonNull(Map.ofEntries(
                 entry("user", user),
                 entry("book", book)
@@ -55,20 +61,21 @@ public class Library {
         return Result.success("Book " + book.getTitle() + " is borrowed successfully by " + user.getEmail());
     }
 
-    public Result returnBook(@NonNull User user, @NonNull Book book) {
-        ValidateUtils.requireNonNull(Map.ofEntries(
-                entry("user", user),
-                entry("book", book)
-        ));
+    public Result returnBook(User user, Book book) {
+        return safeCall(() -> {
+                    ValidateUtils.requireNonNull(Map.ofEntries(
+                            entry("user", user),
+                            entry("book", book)
+                    ));
 
-        if (!user.getLoggedIn()) {
-            return Result.failure("User " +  user.getEmail() + " must be logged in to return books.");
-        }
+                    if (!user.getLoggedIn()) {
+                        return Result.failure("User " + user.getEmail() + " must be logged in to return books.");
+                    }
 
 //        Sprawdzenie, czy książka jest poprawna
-        if (!isBookCorrect(book)) {
-            return Result.failure("Book is not found in system.");
-        }
+                    if (!isBookCorrect(book)) {
+                        return Result.failure("Book is not found in system.");
+                    }
 
         /*
         Na razie metoda ta jest zbędna, ponieważ znajdująca się w niej logika sprawdza, czy użytkownik ma konto.
@@ -81,16 +88,22 @@ public class Library {
          */
 
 //        Sprawdzenie, czy użytkownik ma wypożyczoną tę książkę
-        if (!user.getBorrowedBooks().contains(book)) {
-            return Result.failure
-                    ("User " + user.getEmail() + " does not have book " + book.getTitle() + " borrowed");
-        }
+                    if (!user.getBorrowedBooks().contains(book)) {
+                        return Result.failure
+                                ("User " + user.getEmail() + " does not have book " + book.getTitle() + " borrowed");
+                    }
 
-//        Zwrócenie książki
-        book.setStatus(BookStatus.AVAILABLE);
-        user.getBorrowedBooks().remove(book);
-
-        return Result.success("Book " + book.getTitle() + " is returned successfully by " + user.getEmail());
+                    return safeRun(
+                            () -> {
+                                book.setStatus(BookStatus.AVAILABLE);
+                                user.getBorrowedBooks().remove(book);
+                            },
+                            "Failed to return book " + book.getTitle(),
+                            () -> Result.success(
+                                    "Book " + book.getTitle() + " is returned successfully by " + user.getEmail())
+                    );
+                }, Result.failure("Unexpected error while returning book."),
+                "Error in returnBook method");
     }
 
     public List<Book> listAvailableBooks() {
