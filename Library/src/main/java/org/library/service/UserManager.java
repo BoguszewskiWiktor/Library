@@ -1,9 +1,10 @@
 package org.library.service;
 
 import lombok.NonNull;
-import org.library.util.ValidateUtils;
-import org.library.model.Result;
+import org.library.model.Book;
 import org.library.model.User;
+import org.library.util.Result;
+import org.library.util.ValidateUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -14,6 +15,7 @@ import static java.util.Map.entry;
 public class UserManager {
 
     private final List<User> users = new ArrayList<>();
+    private static final int MAX_BORROW_LIMIT = 5;
 
     public Result registerUser(@NonNull String email, @NonNull String fullName, @NonNull String password) {
         ValidateUtils.requireNonNull(Map.ofEntries(
@@ -74,6 +76,30 @@ public class UserManager {
         return Result.success(user.getFullName() + " has been logged out successfully.");
     }
 
+    public Boolean canBorrowBook(@NonNull User user) {
+        if (!isUserCorrect(user)) {
+            return false;
+        }
+
+        if (!user.isLoggedIn()) {
+            return false;
+        }
+
+        return user.getBorrowedBooks().size() >= MAX_BORROW_LIMIT;
+    }
+
+    public Boolean canReturnBook(@NonNull User user, @NonNull Book book) {
+        if (!isUserCorrect(user)) {
+            return false;
+        }
+
+        if (!user.isLoggedIn()) {
+            return false;
+        }
+
+        return user.getBorrowedBooks().contains(book);
+    }
+
     public String hashPassword(@NonNull String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -96,5 +122,9 @@ public class UserManager {
         return  users.stream()
                 .filter(u -> u.getEmail().trim().equalsIgnoreCase(email))
                 .findFirst();
+    }
+
+    public Boolean isUserCorrect(@NonNull User user) {
+        return getUserByEmail(user.getEmail()).isPresent();
     }
 }

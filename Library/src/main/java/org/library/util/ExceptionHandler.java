@@ -1,7 +1,5 @@
 package org.library.util;
 
-import org.library.model.Result;
-
 import java.util.function.Supplier;
 
 public class ExceptionHandler {

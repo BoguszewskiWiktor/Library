@@ -1,5 +1,6 @@
 import org.library.model.Book;
-import org.library.model.Result;
+import org.library.service.BookManager;
+import org.library.util.Result;
 import org.library.model.User;
 import org.library.service.Library;
 import org.library.service.UserManager;
@@ -12,7 +13,10 @@ public class LibraryWorkflowTest {
 
     public static void main(String[] args) {
         UserManager userManager = new UserManager();
-        Library library = new Library(initializeBooks(), userManager);
+        BookManager bookManager = new BookManager();
+        Library library = new Library(userManager, bookManager);
+
+        library.getBooks().addAll(initializeBooks());
         initializeUsers(userManager);
 
         testLoginUser(userManager);
@@ -31,7 +35,7 @@ public class LibraryWorkflowTest {
 
 //        Scenariusz 1: Niezalogowany użytkownik próbuje oddać książkę
         anna.setLoggedIn(false);
-        Result result1 = library.returnBook(anna, library.getBooks().getLast());
+        Result result1 = library.returnBook(anna, book1);
         System.out.println("1. " + result1.getMessage());
 
 //        Scenariusz 2: Poprawne zwrócenie książki
@@ -66,7 +70,8 @@ public class LibraryWorkflowTest {
 //        Scenariusz 7: Zwracanie wielu książek po kolei
         System.out.println("7. Returning few books");
         System.out.printf
-                ("Amount of borrowed books before returned any book by user: %s = %d%n", anna.getFullName(), anna.getBorrowedBooks().size());
+                ("Amount of borrowed books before returned any book by user: %s = %d%n",
+                        anna.getFullName(), anna.getBorrowedBooks().size());
         for (int i = 0; i < 3; i++) {
             Result result = library.returnBook(anna, anna.getBorrowedBooks().getFirst());
             System.out.println(result.getMessage());
@@ -74,11 +79,11 @@ public class LibraryWorkflowTest {
                     ("Amount of borrowed books by user: %s = %d%n", anna.getFullName(), anna.getBorrowedBooks().size());
         }
 
-//        Scenariusz 8: Zwrot książki, która jest już dostępna
+//        Scenariusz 8: Książka jako null
         Result result8 = library.returnBook(anna, null);
         System.out.println("8. " + result8.getMessage());
 
-//        Scenariusz 9: Zwrot książki, która jest już dostępna
+//        Scenariusz 9: Użytkownik jako null
         Result result9 = library.returnBook(null, book1);
         System.out.println("9. " + result9.getMessage());
     }
@@ -120,6 +125,13 @@ public class LibraryWorkflowTest {
             Result result5 = library.borrowBook(random.get(), library.getBooks().getLast());
             System.out.println("5. " + result5.getMessage());
         }
+//        Scenariusz 6: Użytkownik jako null
+        Result result6 = library.borrowBook(null, book1);
+        System.out.println("6. " + result6.getMessage());
+
+//        Scenariusz 7: Książka jako null
+        Result result7 = library.borrowBook(anna, null);
+        System.out.println("7. " + result7.getMessage());
     }
 
     private static void testLogoutUser(UserManager userManager) {
