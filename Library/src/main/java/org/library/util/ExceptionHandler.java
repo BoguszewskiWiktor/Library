@@ -39,7 +39,8 @@ public class ExceptionHandler {
         try {
             return task.get();
         } catch (Exception e) {
-            System.err.printf("[ERROR] (%s): %s%n", context, e.getMessage());
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "No message";
+            System.err.printf("[ERROR in %s] -> %s (%s)%n", context, errorMessage, e.getClass().getSimpleName());
             return fallback;
         }
     }

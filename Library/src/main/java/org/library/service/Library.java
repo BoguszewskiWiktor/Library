@@ -8,6 +8,7 @@ import org.library.model.Book;
 import org.library.model.Result;
 import org.library.model.User;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,11 +63,12 @@ public class Library {
     }
 
     public Result returnBook(User user, Book book) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("user", user);
+        values.put("book", book);
+
         return safeCall(() -> {
-                    ValidateUtils.requireNonNull(Map.ofEntries(
-                            entry("user", user),
-                            entry("book", book)
-                    ));
+                    ValidateUtils.requireNonNull(values);
 
                     if (!user.getLoggedIn()) {
                         return Result.failure("User " + user.getEmail() + " must be logged in to return books.");
@@ -103,7 +105,7 @@ public class Library {
                                     "Book " + book.getTitle() + " is returned successfully by " + user.getEmail())
                     );
                 }, Result.failure("Unexpected error while returning book."),
-                "Error in returnBook method");
+                "Library.returnBook");
     }
 
     public List<Book> listAvailableBooks() {

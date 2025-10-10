@@ -24,7 +24,7 @@ public class LibraryWorkflowTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private static void testReturnBook(Library library, UserManager userManager) {
-        System.out.println("\n=== TEST: Borrow Book ===");
+        System.out.println("\n=== TEST: Return Book ===");
 
         User anna = userManager.getUserByEmail("anna.kowalska@example.com").get();
         Book book1 = anna.getBorrowedBooks().getFirst();
