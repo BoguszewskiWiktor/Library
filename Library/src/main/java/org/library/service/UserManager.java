@@ -85,7 +85,7 @@ public class UserManager {
             return false;
         }
 
-        return user.getBorrowedBooks().size() >= MAX_BORROW_LIMIT;
+        return user.getBorrowedBooks().size() < MAX_BORROW_LIMIT;
     }
 
     public Boolean canReturnBook(@NonNull User user, @NonNull Book book) {

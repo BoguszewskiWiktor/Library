@@ -31,7 +31,7 @@ public class LibraryWorkflowTest {
         System.out.println("\n=== TEST: Return Book ===");
 
         User anna = userManager.getUserByEmail("anna.kowalska@example.com").get();
-        Book book1 = anna.getBorrowedBooks().getFirst();
+        Book book1 = library.getBooks().getFirst();
 
 //        Scenariusz 1: Niezalogowany użytkownik próbuje oddać książkę
         anna.setLoggedIn(false);
@@ -96,6 +96,7 @@ public class LibraryWorkflowTest {
         Book book1 = library.getBooks().getFirst();
 
 //        Scenariusz 1: Poprawne wypożyczenie
+        anna.setLoggedIn(true);
         Result result1 = library.borrowBook(anna, book1);
         System.out.println("1. " + result1.getMessage());
 
@@ -120,7 +121,7 @@ public class LibraryWorkflowTest {
 //        Scenariusz 5: Próba wypożyczenia książki przez nieistniejącego użytkownika
         Optional<User> random = userManager.getUserByEmail("random@email.com");
         if (random.isEmpty()) {
-            System.out.println("5. User not found, cannot borrow book");
+            System.out.println("5. User not found, cannot borrow book.");
         } else {
             Result result5 = library.borrowBook(random.get(), library.getBooks().getLast());
             System.out.println("5. " + result5.getMessage());

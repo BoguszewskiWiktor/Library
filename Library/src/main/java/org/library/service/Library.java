@@ -32,7 +32,7 @@ public class Library {
 
 //                    Sprawdzenie, czy użytkownik może wypożyczyć książkę
                     if (!userManager.canBorrowBook(user)) {
-                        return Result.failure("User " + user.getEmail() + " is not allowed to borrow books.");
+                        return Result.failure("User " + user.getEmail() + " is not allowed to borrow book.");
                     }
 
 //                    Sprawdzenie, czy książka jest możliwa do wypożyczenia
@@ -47,7 +47,7 @@ public class Library {
                             },
                             "Failed to borrow book " + book.getTitle(),
                             () -> Result.success(
-                                    "Book " + book.getTitle() + " is borrowed successfully by " + user.getEmail() + ".")
+                                    "Book " + book.getTitle() + " is borrowed successfully by " + user.getEmail())
                     );
                 }, Result.failure("Unexpected error while borrowing book."),
                 "Library.borrowBook");
@@ -79,7 +79,7 @@ public class Library {
                             },
                             "Failed to return book " + book.getTitle(),
                             () -> Result.success(
-                                    "Book " + book.getTitle() + " is returned successfully by " + user.getEmail() + ".")
+                                    "Book " + book.getTitle() + " is returned successfully by " + user.getEmail())
                     );
                 }, Result.failure("Unexpected error while returning book."),
                 "Library.returnBook");
