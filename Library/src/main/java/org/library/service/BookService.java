@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class BookManager {
+public class BookService {
     private final List<Book> books = new ArrayList<>();
 
     public List<Book> listAvailableBooks() {

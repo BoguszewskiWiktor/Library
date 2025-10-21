@@ -9,11 +9,12 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"borrowedBooks"})
 @ToString(exclude = {"borrowedBooks"})
 @RequiredArgsConstructor
-@NoArgsConstructor
 public class User {
     private String userId;
-    @NonNull private String fullName;
-    @NonNull private String email;
+    @NonNull
+    private String fullName;
+    @NonNull
+    private String email;
     private String password;
     private List<Book> borrowedBooks = new ArrayList<>();
     private Boolean loggedIn = false;

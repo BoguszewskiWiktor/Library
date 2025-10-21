@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- 🔇 Wyłączenie komunikatów startowych Logbacka -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!-- ========================================================= -->
+    <!-- 1️⃣ Ustawienia ogólne -->
+    <!-- ========================================================= -->
+
+    <!-- Zmienna środowiskowa -->
+    <property name="LOG_PATH" value="${user.dir}/logs" />
+    <property name="APP_NAME" value="LibraryApp" />
+
+    <!-- Włącz automatyczne ponowne wczytywanie konfiguracji co 30 sekund -->
+    <!-- (scan="true" i scanPeriod) -->
+
+    <!-- ========================================================= -->
+    <!-- 2️⃣ Formatowanie logów -->
+    <!-- ========================================================= -->
+
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <!-- Wersja dla pliku – z nazwą aplikacji -->
+    <property name="FILE_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{user}] - %msg%n"/>
+
+    <!-- ========================================================= -->
+    <!-- 3️⃣ Appender do konsoli -->
+    <!-- ========================================================= -->
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ========================================================= -->
+    <!-- 4️⃣ Appender do pliku (z rotacją) -->
+    <!-- ========================================================= -->
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Tworzy nowy plik każdego dnia -->
+            <fileNamePattern>${LOG_PATH}/archive/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+            <!-- Maksymalny przybliżony rozmiar pliku-->
+            <maxFileSize>10MB</maxFileSize>
+
+            <!-- Maksymalny rozmiar folderu z logami -->
+            <totalSizeCap>1GB</totalSizeCap>
+
+            <!-- Przechowuj logi maksymalnie przez 30 dni -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ========================================================= -->
+    <!-- 5️⃣ Loggery dla różnych pakietów -->
+    <!-- ========================================================= -->
+
+    <!-- Logowanie dla Twojego kodu (np. com.project lub pl.twojeaplikacje) -->
+    <logger name="com.libraryapp" level="debug" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- Ogranicz głośność logów bibliotek zewnętrznych -->
+    <logger name="org.springframework" level="warn"/>
+    <logger name="org.hibernate" level="error"/>
+    <logger name="ch.qos.logback" level="warn"/>
+
+    <!-- ========================================================= -->
+    <!-- 6️⃣ Root logger (dla reszty logów) -->
+    <!-- ========================================================= -->
+
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

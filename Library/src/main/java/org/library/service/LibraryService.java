@@ -17,9 +17,9 @@ import static org.library.util.ExceptionHandler.safeRun;
 
 
 @Data
-public class Library {
-    private final UserManager userManager;
-    private final BookManager bookManager;
+public class LibraryService {
+    private final UserService userService;
+    private final BookService bookService;
 
     public Result borrowBook(User user, Book book) {
         Map<String, Object> values = new HashMap<>();
@@ -31,12 +31,12 @@ public class Library {
                     ValidateUtils.requireNonNull(values);
 
 //                    Sprawdzenie, czy użytkownik może wypożyczyć książkę
-                    if (!userManager.canBorrowBook(user)) {
+                    if (!userService.canBorrowBook(user)) {
                         return Result.failure("User " + user.getEmail() + " is not allowed to borrow book.");
                     }
 
 //                    Sprawdzenie, czy książka jest możliwa do wypożyczenia
-                    if (!bookManager.isBookAvailable(book)) {
+                    if (!bookService.isBookAvailable(book)) {
                         return Result.failure("Book " + book.getTitle() + " cannot be borrowed.");
                     }
 
@@ -62,13 +62,13 @@ public class Library {
                     ValidateUtils.requireNonNull(values);
 
 //                    Sprawdzenie, czy użytkownik może zwrócić książkę
-                    if (!userManager.canReturnBook(user, book)) {
+                    if (!userService.canReturnBook(user, book)) {
                         return Result.failure
                                 ("User " + user.getEmail() + " cannot return book " + book.getTitle() + ".");
                     }
 
 //                    Sprawdzenie, czy książka jest poprawna
-                    if (!bookManager.isBookCorrect(book)) {
+                    if (!bookService.isBookCorrect(book)) {
                         return Result.failure("Book is not found in system.");
                     }
 
@@ -90,6 +90,6 @@ public class Library {
     }
 
     public List<Book> getBooks() {
-        return bookManager.getBooks();
+        return bookService.getBooks();
     }
 }
