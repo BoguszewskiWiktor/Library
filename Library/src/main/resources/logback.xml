@@ -20,11 +20,11 @@
     <!-- ========================================================= -->
 
     <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}.%method - %msg%n"/>
 
     <!-- Wersja dla pliku – z nazwą aplikacji -->
     <property name="FILE_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{user}] - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
 
     <!-- ========================================================= -->
     <!-- 3️⃣ Appender do konsoli -->
@@ -67,7 +67,7 @@
     <!-- ========================================================= -->
 
     <!-- Logowanie dla Twojego kodu (np. com.project lub pl.twojeaplikacje) -->
-    <logger name="com.libraryapp" level="debug" additivity="false">
+    <logger name="org.library" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>

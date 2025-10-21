@@ -57,7 +57,7 @@ public class UserService {
 
         log.debug("Created new user: id={}, fullName={}, email={}", newId, fullName, email);
 
-        log.info("User {} successfully registered.", email);
+        log.info("User {} successfully registered.", fullName);
         return Result.success("User " + newUser.getEmail() + " has been successfully registered.");
     }
 
@@ -144,7 +144,7 @@ public class UserService {
     }
 
     public String hashPassword(@NonNull String password) {
-        log.info("Attempting to hash password: {}", password);
+        log.info("Attempting to hash password");
         log.debug("Password before hashing: {}", password);
 
         try {
@@ -171,7 +171,7 @@ public class UserService {
     }
 
     public Optional<User> getUserByEmail(@NonNull String email) {
-        log.info("Searching for user with email: {}", email);
+        log.info("Getting user with email: {}", email);
 
         Optional<User> user = users.stream()
                 .filter(u -> u.getEmail().trim().equalsIgnoreCase(email))
