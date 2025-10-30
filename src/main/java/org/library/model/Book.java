@@ -1,12 +1,15 @@
 package org.library.model;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @Data
-@EqualsAndHashCode(exclude = {"status"})
+@EqualsAndHashCode(exclude = {"bookID", "status"})
 @RequiredArgsConstructor
 public class Book {
-    @NonNull private Integer bookID;
+    private Long bookID;
     @NonNull private String title;
     @NonNull private String author;
     @NonNull private Integer year;

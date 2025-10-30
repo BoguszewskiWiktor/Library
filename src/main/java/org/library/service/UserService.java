@@ -19,14 +19,15 @@ public class UserService {
     private final List<User> users = new ArrayList<>();
     private static final int MAX_BORROW_LIMIT = 5;
 
-    public Result registerUser(String email, String fullName, String password) {
+    public Result registerUser(@NonNull String email, @NonNull String fullName, @NonNull String password) {
         log.info("Attempting to register user: {} ({})", fullName, email);
 
-        ValidateUtils.requireNonNull(Map.ofEntries(
-                entry("email", email),
-                entry("fullName", fullName),
-                entry("password", password)
-        ));
+        if (email.isBlank() || fullName.isBlank() || password.isBlank()) {
+            log.warn("User validation failed - one or more required fields are empty " +
+                    "(email: {}, fullName: {}, password: {}) ", email, fullName, password);
+            return Result.failure("User email, full name, and password cannot be empty");
+        }
+
         if (!email.contains("@")) {
             log.warn("Registration failed for {}. Invalid email format.", email);
             return Result.failure("Invalid email format. Email address must contain @.");

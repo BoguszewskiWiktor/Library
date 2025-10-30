@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.library.model.Book;
 import org.library.model.BookStatus;
+import org.library.util.Result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,34 @@ import java.util.List;
 @Data
 public class BookService {
     private final List<Book> books = new ArrayList<>();
+    private Long BOOK_ID = 0L;
+
+    public Result addBook(@NonNull String title,
+                          @NonNull String author,
+                          @NonNull Integer year,
+                          @NonNull String publisher) {
+
+        long bookID = ++BOOK_ID;
+        log.debug("Attempting to add new book with ID: {}, title: {}, author: {}",  bookID, title, author);
+
+        if (title.isBlank() || author.isBlank() || publisher.isBlank()) {
+            log.warn("Book validation failed - one or more required fields are empty " +
+                    "(title : {}, author : {}, publisher : {})",  title, author, publisher);
+            return Result.failure("Book title, author, publisher cannot be empty");
+        }
+
+        Book newBook = new Book(title, author, year, publisher);
+        newBook.setBookID(bookID);
+
+        if (books.contains(newBook)) {
+            log.warn("Duplicate book detected: title={}, author={}, year={}, publisher={}",  title, author, year, publisher);
+            return Result.failure("Book already exists in the system");
+        }
+
+        books.add(newBook);
+        log.info("Book added successfully: title={}, author={}, year={}, publisher={}",  title, author, year, publisher);
+        return Result.success("Book added successfully");
+    }
 
     public List<Book> listAvailableBooks() {
         log.debug("Listing available books...");

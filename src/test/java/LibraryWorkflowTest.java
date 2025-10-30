@@ -51,7 +51,7 @@ public class LibraryWorkflowTest {
 //        Scenariusz 4: Zwrot książki, która nie istnieje w systemie
         Result result4 = libraryService.returnBook(
                 anna,
-                new Book(999, "Random Tittle", "Random Author", 1294, "Random Publisher")
+                new Book("Random Tittle", "Random Author", 1294, "Random Publisher")
         );
         System.out.println("4. " + result4.getMessage());
 
@@ -115,7 +115,7 @@ public class LibraryWorkflowTest {
 //        Scenariusz 4: Próba wypożyczenia książki nieistniejącej w systemie
         Result result4 = libraryService.borrowBook(
                 anna,
-                new Book(999, "Random Tittle", "Random Author", 1294, "Random Publisher")
+                new Book("Random Tittle", "Random Author", 1294, "Random Publisher")
         );
         System.out.println("4. " + result4.getMessage());
 
@@ -195,18 +195,18 @@ public class LibraryWorkflowTest {
 
     private static List<Book> initializeBooks() {
         List<Book> books = new ArrayList<>(List.of(
-                new Book(1, "Clean Code", "Robert C. Martin", 2008, "Prentice Hall"),
-                new Book(2, "Effective Java", "Joshua Bloch", 2018, "Addison-Wesley"),
-                new Book(3, "The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley"),
-                new Book(4, "1984", "George Orwell", 1949, "Secker & Warburg"),
-                new Book(5, "To Kill a Mockingbird", "Harper Lee", 1960, "J.B. Lippincott & Co."),
-                new Book(6, "The Hobbit", "J.R.R. Tolkien", 1937, "George Allen & Unwin"),
-                new Book(7, "Java: The Complete Reference", "Herbert Schildt", 2018, "McGraw-Hill"),
-                new Book(8, "Design Patterns", "Erich Gamma", 1994, "Addison-Wesley"),
-                new Book(9, "Crime and Punishment", "Fyodor Dostoevsky", 1866, "The Russian Messenger"),
-                new Book(10, "Thinking in Java", "Bruce Eckel", 2006, "Prentice Hall"),
-                new Book(11, "The Catcher in the Rye", "J.D. Salinger", 1951, "Little, Brown and Company"),
-                new Book(12, "Sapiens: A Brief History of Humankind", "Yuval Noah Harari", 2011, "Harvill Secker")
+                new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall"),
+                new Book("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley"),
+                new Book("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley"),
+                new Book("1984", "George Orwell", 1949, "Secker & Warburg"),
+                new Book("To Kill a Mockingbird", "Harper Lee", 1960, "J.B. Lippincott & Co."),
+                new Book("The Hobbit", "J.R.R. Tolkien", 1937, "George Allen & Unwin"),
+                new Book("Java: The Complete Reference", "Herbert Schildt", 2018, "McGraw-Hill"),
+                new Book("Design Patterns", "Erich Gamma", 1994, "Addison-Wesley"),
+                new Book("Crime and Punishment", "Fyodor Dostoevsky", 1866, "The Russian Messenger"),
+                new Book("Thinking in Java", "Bruce Eckel", 2006, "Prentice Hall"),
+                new Book("The Catcher in the Rye", "J.D. Salinger", 1951, "Little, Brown and Company"),
+                new Book("Sapiens: A Brief History of Humankind", "Yuval Noah Harari", 2011, "Harvill Secker")
         ));
         System.out.println("Books initialized: " + books.size());
         return books;
