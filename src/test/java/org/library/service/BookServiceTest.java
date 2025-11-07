@@ -1,6 +1,7 @@
 package org.library.service;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.library.model.Book;
 import org.library.model.BookStatus;
@@ -11,13 +12,17 @@ import java.util.List;
 
 public class BookServiceTest {
 
+    private BookService bookService;
+
+    @BeforeEach
+    void setup() {
+        bookService = new BookService();
+    }
+
     // addBook()
     @Test
     void shouldAddBookSuccessfully() {
-        // given
-        BookService bookService = new BookService();
-
-        // when
+        // given, when
         Result addBook = bookService.addBook(
                 "Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
@@ -29,10 +34,7 @@ public class BookServiceTest {
 
     @Test
     void shouldFailWhenTitleIsBlank() {
-        // given
-        BookService bookService = new BookService();
-
-        // when
+        // given, when
         Result addBook = bookService.addBook("", "Robert C. Martin", 2008, "Prentice Hall");
 
         // then
@@ -42,10 +44,7 @@ public class BookServiceTest {
 
     @Test
     void shouldFailWhenAuthorIsBlank() {
-        // given
-        BookService bookService = new BookService();
-
-        // when
+        // given, when
         Result addBook = bookService.addBook("Clean Code", "", 2008, "Prentice Hall");
 
         // then
@@ -55,10 +54,7 @@ public class BookServiceTest {
 
     @Test
     void shouldFailWhenPublisherIsBlank() {
-        // given
-        BookService bookService = new BookService();
-
-        // when
+        // given, when
         Result addBook = bookService.addBook("Clean Code", "Robert C. Martin", 2008, "");
 
         // then
@@ -68,62 +64,39 @@ public class BookServiceTest {
 
     @Test
     void shouldHandleDuplicateAvailableBooks() {
-        // given
-        Book book1 =
-                new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
-        Book book2 =
-                new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
-
-        BookService bookService = new BookService();
-
-        // when
-        Result firstAdd = bookService.addBook(
-                book1.getTitle(), book1.getAuthor(), book1.getYear(), book1.getPublisher());
-        Result secondAdd = bookService.addBook(
-                book2.getTitle(), book2.getAuthor(), book2.getYear(), book2.getPublisher());
+        // given, when
+        Result firstAdd = bookService.addBook
+                ("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        Result secondAdd = bookService.addBook
+                ("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
         // then
+        Assertions.assertTrue(firstAdd.getSuccess());
         Assertions.assertFalse(secondAdd.getSuccess());
         Assertions.assertEquals(1, bookService.getBooks().size());
         Assertions.assertEquals("Book already exists in the system", secondAdd.getMessage());
     }
 
-//    @Test
-//    void shouldIncrementBookIdAutomatically() {
-//        // when
-//        BookService bookService = new BookService();
-//
-//    }
-
     @Test
-    void shouldNotModifyOriginalBookList() {
-        // given
-        BookService  bookService = new BookService();
-        Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
-        bookService.addBook(book.getTitle(), book.getAuthor(), book.getYear(), book.getPublisher());
-        List<Book> books = new ArrayList<>(bookService.getBooks());
-
-        // when
-        Result result = bookService.addBook(book.getTitle(), book.getAuthor(), book.getYear(), book.getPublisher());
+    void shouldIncrementBookIdAutomatically() {
+        // given, when
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
+        bookService.addBook("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
 
         // then
-        Assertions.assertFalse(result.getSuccess());
-        Assertions.assertEquals(books, bookService.getBooks(),
-                "Original book list should remain unchanged after duplicate attempt");
-
+        Assertions.assertEquals(List.of(1L, 2L, 3L),
+                bookService.getBooks().stream().map(Book::getBookID).toList());
     }
 
+    // listAvailableBooks()
     @Test
     void shouldReturnOnlyAvailableBooks() {
         // given
-        Book book1 =
-                new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
-        Book book2 =
-                new Book("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
-        Book book3 =
-                new Book("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
+        bookService.addBook("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
 
-        BookService bookService = getBookService(book1, book2, book3);
         bookService.getBooks().get(1).borrow();
 
         // when
@@ -137,45 +110,199 @@ public class BookServiceTest {
     @Test
     void shouldReturnEmptyListWhenNoAvailableBooks() {
         // given
-        Book book1 =
-                new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
-        Book book2 =
-                new Book("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
-        Book book3 =
-                new Book("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
+        bookService.addBook("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
 
-        BookService bookService = getBookService(book1, book2, book3);
-        bookService.getBooks().get(0).borrow();
-        bookService.getBooks().get(1).borrow();
-        bookService.getBooks().get(2).borrow();
+        bookService.getBooks().forEach(Book::borrow);
 
         // when
         List<Book> availableBooks = bookService.listAvailableBooks();
 
         // then
-        Assertions.assertEquals(0, availableBooks.size());
+        Assertions.assertTrue(availableBooks.isEmpty());
     }
 
-    private static BookService getBookService(Book book1, Book book2, Book book3) {
-        BookService bookService = new BookService();
-        bookService.addBook(
-                book1.getTitle(),
-                book1.getAuthor(),
-                book1.getYear(),
-                book1.getPublisher()
+    // searchBookByTitle()
+    @Test
+    void shouldFindBooksByTitleIgnoringCase() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+
+        // when
+        List<Book> result1 = bookService.searchBookByTitle("Clean Code");
+        List<Book> result2 = bookService.searchBookByTitle("clean code");
+        List<Book> result3 = bookService.searchBookByTitle("CLEAN CODE");
+
+        // then
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(1, result1.size()),
+                () -> Assertions.assertEquals(1, result2.size()),
+                () -> Assertions.assertEquals(1, result3.size()),
+                () -> Assertions.assertEquals(result1.getFirst(), result2.getFirst()),
+                () -> Assertions.assertEquals(result1.getFirst(), result3.getFirst())
         );
-        bookService.addBook(
-                book2.getTitle(),
-                book2.getAuthor(),
-                book2.getYear(),
-                book2.getPublisher()
-        );
-        bookService.addBook(
-                book3.getTitle(),
-                book3.getAuthor(),
-                book3.getYear(),
-                book3.getPublisher()
-        );
-        return bookService;
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoBooksFound() {
+        // when
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+
+        // when
+        List<Book> books = new ArrayList<>(bookService.searchBookByTitle("Clean"));
+
+        // then
+        Assertions.assertEquals(0, books.size());
+    }
+
+    // isBookAvailable(Book book)
+    @Test
+    void shouldReturnTrueWhenBookExistAndIsAvailable() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        Book book = bookService.getBooks().getFirst();
+
+        // when
+        Boolean bookAvailable = bookService.isBookAvailable(book);
+
+        // then
+        Assertions.assertTrue(bookAvailable);
+
+    }
+
+    @Test
+    void shouldReturnFalseWhenBookIsBorrowed() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        Book book = bookService.getBooks().getFirst();
+        book.borrow();
+
+        // when
+        Boolean bookAvailable = bookService.isBookAvailable(book);
+
+        // then
+        Assertions.assertFalse(bookAvailable);
+    }
+
+    @Test
+    void shouldReturnFalseWhenBookNotInSystem() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+
+        // when
+        Boolean bookAvailable = bookService.isBookAvailable
+                (new Book("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley"));
+
+        // then
+        Assertions.assertFalse(bookAvailable);
+    }
+
+    // isBookCorrect(Book book)
+    @Test
+    void shouldReturnTrueWhenBookExists() {
+        // given
+        Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        book.setBookID(1L);
+        bookService.getBooks().add(book);
+
+        // when
+        Boolean result = bookService.isBookCorrect(book);
+
+        // then
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    void shouldReturnFalseWhenBookNotExists() {
+        // given
+        Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        book.setBookID(1L);
+
+        // when
+        Boolean result = bookService.isBookCorrect(book);
+
+        // then
+        Assertions.assertFalse(result);
+    }
+
+    // additional cases
+    @Test
+    void shouldNotModifyOriginalBookList() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        List<Book> books = new ArrayList<>(bookService.getBooks());
+
+        // when
+        Result result = bookService.addBook
+                ("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+
+        // then
+        Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals(books, bookService.getBooks(),
+                "Original book list should remain unchanged after duplicate attempt");
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAddingBookWithNullTitle() {
+        // given, when, then
+        Assertions.assertThrows(NullPointerException.class,
+                () -> bookService.addBook(null, "Robert C. Martin", 2008, "Prentice Hall"));
+    }
+
+    @Test
+    void shouldMaintainUniqueIdsAcrossAdds() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
+        bookService.addBook("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
+
+        // when
+        bookService.searchBookByTitle("Effective Java");
+        bookService.getBooks().getFirst().borrow();
+        bookService.getBooks().getFirst().returnBack();
+
+        bookService.addBook("Refactoring", "Martin Fowler", 1999, "Addison-Wesley");
+
+        // then
+        List<Long> ids = bookService.getBooks()
+                .stream()
+                .map(Book::getBookID)
+                .toList();
+
+        long uniqueIds = ids.stream().distinct().count();
+
+        Assertions.assertEquals(ids.size(), uniqueIds,
+                "Each book should have a unique ID, even after multiple operations");
+
+        Assertions.assertEquals(List.of(1L, 2L, 3L, 4L), ids,
+                "Book IDs should increment sequentially across additions");
+    }
+
+    @Test
+    void shouldHandleYearEdgeCases() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        bookService.addBook("Effective Java", "Joshua Bloch", 1000, "Addison-Wesley");
+        bookService.addBook("The Pragmatic Programmer", "Andrew Hunt", 1450, "Addison-Wesley");
+        bookService.addBook("Refactoring", "Martin Fowler", 2025, "Addison-Wesley");
+        bookService.addBook("To Kill a Mockingbird", "Harper Lee", 2300, "J.B. Lippincott & Co.");
+
+        // when
+        List<Book> result1 = bookService.searchBookByTitle("Effective Java");
+        List<Book> result2 = bookService.searchBookByTitle("To Kill a Mockingbird");
+        List<Book> result3 = bookService.searchBookByTitle("Clean Code");
+        List<Book> result4 = bookService.searchBookByTitle("Refactoring");
+        List<Book> result5 = bookService.searchBookByTitle("The Pragmatic Programmer");
+        int size = bookService.getBooks().size();
+
+        // then
+        Assertions.assertTrue(result1.isEmpty());
+        Assertions.assertTrue(result2.isEmpty());
+        Assertions.assertFalse(result3.isEmpty());
+        Assertions.assertFalse(result4.isEmpty());
+        Assertions.assertFalse(result5.isEmpty());
+        Assertions.assertEquals(3, size);
     }
 }

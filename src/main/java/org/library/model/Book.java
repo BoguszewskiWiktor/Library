@@ -4,10 +4,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @EqualsAndHashCode(exclude = {"bookID", "status"})
 @RequiredArgsConstructor
+@Slf4j
 public class Book {
     private Long bookID;
     @NonNull private String title;
@@ -17,12 +19,15 @@ public class Book {
     private BookStatus status = BookStatus.AVAILABLE;
 
     public Boolean isAvailable() {
+        log.debug("Checking if book '{}' is available", title);
         return status == BookStatus.AVAILABLE;
     }
     public void borrow() {
+        log.info("Setting book {} status to BORROWED", title);
         this.status = BookStatus.BORROWED;
     }
     public void returnBack() {
+        log.info("Setting book {} status to AVAILABLE", title);
         this.status = BookStatus.AVAILABLE;
     }
 }

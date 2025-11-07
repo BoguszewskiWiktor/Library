@@ -7,6 +7,7 @@ import org.library.model.Book;
 import org.library.model.BookStatus;
 import org.library.util.Result;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,12 @@ public class BookService {
         if (books.contains(newBook)) {
             log.warn("Duplicate book detected: title={}, author={}, year={}, publisher={}",  title, author, year, publisher);
             return Result.failure("Book already exists in the system");
+        }
+
+        LocalDate date = LocalDate.now();
+        if (year < 1450 || year > date.getYear()) {
+            log.warn("Year out of bounds: year={}",  year);
+            return Result.failure("Year out of bounds");
         }
 
         books.add(newBook);
@@ -68,7 +75,7 @@ public class BookService {
                 .toList();
 
         if (foundBooks.isEmpty()) {
-            log.warn("No books found with the given tittle {}.", title);
+            log.warn("No books found with the given title {}.", title);
         } else {
             log.info("Found {} book(s) matching tittle {}.", foundBooks.size(), title);
             foundBooks.forEach(book -> log.debug("Matched book: {}", book.getTitle()));
