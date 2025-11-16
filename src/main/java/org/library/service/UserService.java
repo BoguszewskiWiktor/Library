@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.library.model.Book;
 import org.library.model.User;
 import org.library.util.Result;
-import org.library.util.ValidateUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.*;
-
-import static java.util.Map.entry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 public class UserService {
@@ -113,7 +113,7 @@ public class UserService {
             return false;
         }
 
-        if (user.getBorrowedBooks().size() > MAX_BORROW_LIMIT) {
+        if (user.getBorrowedBooks().size() >= MAX_BORROW_LIMIT) {
             log.warn("User {} has too many borrowed books.", user.getEmail());
             return false;
         }

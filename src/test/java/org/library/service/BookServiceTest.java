@@ -244,6 +244,7 @@ public class BookServiceTest {
 
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void shouldThrowExceptionWhenAddingBookWithNullTitle() {
         // given, when, then
