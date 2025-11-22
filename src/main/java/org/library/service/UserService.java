@@ -130,7 +130,7 @@ public class UserService {
             return false;
         }
 
-        if (!user.getBorrowedBooks().contains(book)) {
+        if (!user.hasBorrowed(book)) {
             log.warn("User {} has not borrowed book {}.", user.getEmail(), book.getTitle());
             return false;
         }

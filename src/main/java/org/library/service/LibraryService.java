@@ -32,7 +32,7 @@ public class LibraryService {
             return Result.failure("User " + user.getEmail() + " is not allowed to borrow book.");
         }
 
-        book.setStatus(BookStatus.BORROWED);
+        book.borrow();
         user.getBorrowedBooks().add(book);
 
         log.info("Book {} borrowed successfully by {}", book.getTitle(), user.getEmail());
@@ -56,7 +56,7 @@ public class LibraryService {
         }
 
         book.setStatus(BookStatus.AVAILABLE);
-        user.getBorrowedBooks().remove(book);
+        user.returnBook(book);
 
         log.info("Book {} returned successfully by {}", book.getTitle(), user.getEmail());
         return Result.success("Book " + book.getTitle() + " is returned successfully by " + user.getEmail());

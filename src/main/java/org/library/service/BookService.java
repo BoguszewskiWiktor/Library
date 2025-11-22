@@ -92,7 +92,7 @@ public class BookService {
             return false;
         }
 
-        boolean available = book.getStatus() != BookStatus.BORROWED;
+        boolean available = book.isAvailable();
         log.info("Book {} availability: {}.", book.getTitle(), available);
         return available;
     }
