@@ -32,6 +32,7 @@ public class UserServiceTest {
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("User email, full name, and password cannot be empty",  result.getMessage());
     }
 
     @Test
@@ -41,6 +42,39 @@ public class UserServiceTest {
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("Invalid email format. Email address must contain @.",  result.getMessage());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Test
+    void shouldTrimAndNormalizeEmail() {
+        // given, when
+        Result result = userService.registerUser(
+                "     AndrzejK@email.com", "Andrzej Kowalski", "Password");
+        User user = userService.getUserByEmail("AndrzejK@email.com").get();
+
+        // then
+        Assertions.assertTrue(result.getSuccess());
+        Assertions.assertEquals("andrzejk@email.com", user.getEmail());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Test
+    void duplicateDetectionShouldBeCaseInsensitive() {
+        // given
+        Result result1 = userService.registerUser(
+                "     AndrzejK@email.com", "Andrzej Kowalski", "Password1");
+        User user = userService.getUserByEmail("AndrzejK@email.com").get();
+
+        // when
+        Result result2 = userService.registerUser(
+                "ANDRZEJK@EMAIL.COM", "Andrzej Kowalski", "Password");
+
+        // then
+        Assertions.assertTrue(result1.getSuccess());
+        Assertions.assertFalse(result2.getSuccess());
+        Assertions.assertEquals(
+                "User with email address " + user.getEmail() + " already exists.", result2.getMessage());
     }
 
     @SuppressWarnings("DataFlowIssue")
@@ -58,6 +92,7 @@ public class UserServiceTest {
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("User email, full name, and password cannot be empty", result.getMessage());
     }
 
     @Test
@@ -67,37 +102,53 @@ public class UserServiceTest {
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals(
+                "Invalid full name format. Full name must contain whitespace between name and surname.",
+                result.getMessage()
+        );
     }
 
     @Test
     void shouldFailWhenPasswordTooShort() {
         // given, when
-        Result result = userService.registerUser("Andrzej@email.com", "AndrzejKowalski", "Pass");
+        Result result = userService.registerUser("Andrzej@email.com", "Andrzej Kowalski", "Pass");
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("Invalid password length. Password should be at least 8 characters.",
+                result.getMessage());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     void shouldFailWhenEmailAlreadyExists() {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
+        User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
 
         // when
-        Result result = userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski2", "Password");
+        Result result = userService.registerUser(
+                "andrzej.kowalski@email.com", "Andrzej Kowalski2", "Password");
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("User with email address " + user.getEmail() + " already exists.",
+                result.getMessage());
 
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     void shouldSuccessWhenGivenValidInput() {
         // given, when
-        Result result = userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
+        Result result = userService.registerUser(
+                "andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
+        User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
 
         // then
         Assertions.assertTrue(result.getSuccess());
+        Assertions.assertEquals("User " + user.getEmail() + " has been successfully registered.",
+                result.getMessage());
     }
 
     // loginUser()
@@ -110,6 +161,7 @@ public class UserServiceTest {
         Result result = userService.loginUser("andrzejkowalski@email.com", "Password");
 
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("User with email andrzejkowalski@email.com does not exist.", result.getMessage());
     }
 
     @Test
@@ -118,42 +170,50 @@ public class UserServiceTest {
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
 
         // when
-        Result result = userService.loginUser("andrzejkowalski@email.com", "Password1");
+        Result result = userService.loginUser("andrzej.kowalski@email.com", "Password1");
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("Invalid password.", result.getMessage());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     void shouldFailWhenUserAlreadyLoggedIn() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
-        userService.loginUser("adrzej.kowalski@email.com", "Password");
+        User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
+        userService.loginUser("andrzej.kowalski@email.com", "Password");
 
         // when
-        Result result = userService.loginUser("adrzej.kowalski@email.com", "Password");
+        Result result = userService.loginUser("andrzej.kowalski@email.com", "Password");
 
         // then
         Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals(user.getFullName() + " is already logged in.", result.getMessage());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     void shouldSuccessWhenCorrectCredentials() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
+        User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
 
         // when
         Result result = userService.loginUser("andrzej.kowalski@email.com", "Password");
 
         // then
         Assertions.assertTrue(result.getSuccess());
+        Assertions.assertEquals(user.getFullName() + " successfully logged in.", result.getMessage());
     }
 
     // logoutUser()
     @Test
     void shouldFailWhenUserNotLoggedIn() {
         // given
-        User user = new User("1", "Andrzej Kowalski", "andrzej.kowalski@email.com", "Password");
+        User user = new User(
+                "1", "Andrzej Kowalski", "andrzej.kowalski@email.com", "Password");
 
         // when
         Result result = userService.logoutUser(user);
@@ -184,7 +244,8 @@ public class UserServiceTest {
     @Test
     void shouldReturnFalseWhenUserNotCorrect() {
         // given
-        User user = new User("1", "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
+        User user = new User(
+                "1", "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
 
         // when
         Boolean canBorrowBook = userService.canBorrowBook(user);

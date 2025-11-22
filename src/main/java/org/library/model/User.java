@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(exclude = {"borrowedBooks"})
+@EqualsAndHashCode(exclude = {"borrowedBooks", "userId"})
 @ToString(exclude = {"borrowedBooks"})
 @RequiredArgsConstructor
 public class User {

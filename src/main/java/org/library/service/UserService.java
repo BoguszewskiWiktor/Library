@@ -20,54 +20,49 @@ public class UserService {
     private static final int MAX_BORROW_LIMIT = 5;
 
     public Result registerUser(@NonNull String email, @NonNull String fullName, @NonNull String password) {
-        log.info("Attempting to register user: {} ({})", fullName, email);
+        String normalizedEmail = normalizeEmail(email);
 
-        if (email.isBlank() || fullName.isBlank() || password.isBlank()) {
-            log.warn("User validation failed - one or more required fields are empty " +
-                    "(email: {}, fullName: {}, password: {}) ", email, fullName, password);
-            return Result.failure("User email, full name, and password cannot be empty");
-        }
+        log.info("Attempting to register user: {} ({})", fullName, normalizedEmail);
 
-        if (!email.contains("@")) {
-            log.warn("Registration failed for {}. Invalid email format.", email);
-            return Result.failure("Invalid email format. Email address must contain @.");
-        }
+        Result registrationInput = validateRegistrationInputs(normalizedEmail, fullName, password);
+        if (registrationInput != null) return registrationInput;
 
-        if (!fullName.contains(" ")) {
-            log.warn("Registration failed for {}. Invalid full name '{}'.", email, fullName);
-            return Result.failure("Invalid full name format. Full name must contain whitespace between name and surname.");
-        }
+        Result emailFormat = isEmailFormatValid(normalizedEmail);
+        if (emailFormat != null) return emailFormat;
 
-        if (password.length() < 8) {
-            log.warn("Registration failed for {}. Password too short ({} characters).", email, password.length());
-            return Result.failure("Invalid password length. Password should be at least 8 characters.");
-        }
+        Result fullNameValid = isFullNameValid(normalizedEmail, fullName);
+        if (fullNameValid != null) return fullNameValid;
+
+        Result strongPassword = isPasswordStrongEnough(normalizedEmail, password);
+        if (strongPassword != null) return strongPassword;
 
         boolean userExists = users.stream()
-                .anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(normalizedEmail));
 
         if (userExists) {
-            log.warn("User with email {} already exists.", email);
-            return Result.failure("User with email address " + email + " already exists.");
+            log.warn("User with email {} already exists.", normalizedEmail);
+            return Result.failure("User with email address " + normalizedEmail + " already exists.");
         }
 
         String newId = generatedUserId();
         String hashedPassword = hashPassword(password);
-        User newUser = new User(newId, fullName, email, hashedPassword);
+        User newUser = new User(newId, fullName, normalizedEmail, hashedPassword);
         users.add(newUser);
 
-        log.debug("Created new user: id={}, fullName={}, email={}", newId, fullName, email);
+        log.debug("Created new user: id={}, fullName={}, email={}", newId, fullName, normalizedEmail);
 
         log.info("User {} successfully registered.", fullName);
         return Result.success("User " + newUser.getEmail() + " has been successfully registered.");
     }
 
     public Result loginUser(@NonNull String email, @NonNull String password) {
-        log.info("Attempting to login user: {} ({})", email, password);
+        String normalizedEmail = normalizeEmail(email);
 
-        Optional<User> optionalUser = getUserByEmail(email);
+        log.info("Attempting to login user: {}", password);
+
+        Optional<User> optionalUser = getUserByEmail(normalizedEmail);
         if (optionalUser.isEmpty()) {
-            log.error("Account with email {} does not exist.", email);
+            log.error("Account with email {} does not exist.", normalizedEmail);
             return Result.failure("User with email " + email + " does not exist.");
         }
 
@@ -78,11 +73,11 @@ public class UserService {
             log.warn("Invalid password.");
             return Result.failure("Invalid password.");
         } else if (user.isLoggedIn()) {
-            log.warn("User {} is already logged in.", email);
+            log.warn("User {} is already logged in.", normalizedEmail);
             return Result.failure(user.getFullName() + " is already logged in.");
         } else {
             user.setLoggedIn(true);
-            log.info("User {} successfully logged in.", email);
+            log.info("User {} successfully logged in.", normalizedEmail);
             return Result.success(user.getFullName() + " successfully logged in.");
         }
     }
@@ -146,7 +141,7 @@ public class UserService {
 
     public String hashPassword(@NonNull String password) {
         log.info("Attempting to hash password");
-        log.debug("Password before hashing: {}", password);
+        log.debug("Hashing password");
 
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -172,15 +167,15 @@ public class UserService {
     }
 
     public Optional<User> getUserByEmail(@NonNull String email) {
-        log.info("Getting user with email: {}", email);
+        log.info("Getting user with email: {}", normalizeEmail(email));
 
         Optional<User> user = users.stream()
-                .filter(u -> u.getEmail().trim().equalsIgnoreCase(email))
+                .filter(u -> u.getEmail().equalsIgnoreCase(normalizeEmail(email)))
                 .findFirst();
         if (user.isPresent()) {
             log.info("User found: {}", user.get().getEmail());
         } else {
-            log.warn("User with email {} not found.", email);
+            log.warn("User with email {} not found.", normalizeEmail(email));
         }
         return user;
     }
@@ -195,5 +190,43 @@ public class UserService {
             log.warn("User {} is invalid.", user.getEmail());
         }
         return correct;
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private Result isPasswordStrongEnough(String email, String password) {
+        if (password.length() < 8) {
+            log.warn("Registration failed for {}. Password too short ({} characters).",
+                    email, password.length());
+            return Result.failure("Invalid password length. Password should be at least 8 characters.");
+        }
+        return null;
+    }
+
+    private Result isFullNameValid(String email, String fullName) {
+        if (!fullName.trim().contains(" ")) {
+            log.warn("Registration failed for {}. Invalid full name '{}'.", email, fullName);
+            return Result.failure("Invalid full name format. Full name must contain whitespace between name and surname.");
+        }
+        return null;
+    }
+
+    private Result isEmailFormatValid(String email) {
+        if (!email.contains("@")) {
+            log.warn("Registration failed for {}. Invalid email format.", email);
+            return Result.failure("Invalid email format. Email address must contain @.");
+        }
+        return null;
+    }
+
+    private Result validateRegistrationInputs(String email, String fullName, String password) {
+        if (email.isBlank() || fullName.isBlank() || password.isBlank()) {
+            log.warn("User validation failed - one or more required fields are empty " +
+                    "(email: {}, fullName: {}, password: {}) ", email, fullName, password);
+            return Result.failure("User email, full name, and password cannot be empty");
+        }
+        return null;
     }
 }
