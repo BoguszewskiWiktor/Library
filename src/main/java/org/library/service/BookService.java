@@ -23,11 +23,11 @@ public class BookService {
                           @NonNull String publisher) {
 
         long bookID = ++BOOK_ID;
-        log.debug("Attempting to add new book with ID: {}, title: {}, author: {}",  bookID, title, author);
+        log.debug("Attempting to add new book with ID: {}, title: {}, author: {}", bookID, title, author);
 
         if (title.isBlank() || author.isBlank() || publisher.isBlank()) {
             log.warn("Book validation failed - one or more required fields are empty " +
-                    "(title : {}, author : {}, publisher : {})",  title, author, publisher);
+                    "(title : {}, author : {}, publisher : {})", title, author, publisher);
             return Result.failure("Book title, author, publisher cannot be empty");
         }
 
@@ -35,18 +35,18 @@ public class BookService {
         newBook.setBookID(bookID);
 
         if (books.contains(newBook)) {
-            log.warn("Duplicate book detected: title={}, author={}, year={}, publisher={}",  title, author, year, publisher);
+            log.warn("Duplicate book detected: title={}, author={}, year={}, publisher={}", title, author, year, publisher);
             return Result.failure("Book already exists in the system");
         }
 
         LocalDate date = LocalDate.now();
         if (year < 1450 || year > date.getYear()) {
-            log.warn("Year out of bounds: year={}",  year);
+            log.warn("Year out of bounds: year={}", year);
             return Result.failure("Year out of bounds");
         }
 
         books.add(newBook);
-        log.info("Book added successfully: title={}, author={}, year={}, publisher={}",  title, author, year, publisher);
+        log.info("Book added successfully: title={}, author={}, year={}, publisher={}", title, author, year, publisher);
         return Result.success("Book added successfully");
     }
 
@@ -92,7 +92,7 @@ public class BookService {
             return false;
         }
 
-        boolean available = book.getStatus() !=  BookStatus.BORROWED;
+        boolean available = book.getStatus() != BookStatus.BORROWED;
         log.info("Book {} availability: {}.", book.getTitle(), available);
         return available;
     }

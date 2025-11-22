@@ -152,7 +152,6 @@ public class UserService {
             }
 
             log.info("Password hashing successful");
-            log.debug("Password after hashing: {}", hexString);
             return hexString.toString();
         } catch (Exception e) {
             log.error("Error occurred during password hashing.", e);
