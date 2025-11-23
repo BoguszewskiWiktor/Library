@@ -11,13 +11,14 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class UserService {
 
     private final List<User> users = new ArrayList<>();
     private static final int MAX_BORROW_LIMIT = 5;
+    private static final AtomicInteger COUNTER = new AtomicInteger(1);
 
     public Result registerUser(@NonNull String email, @NonNull String fullName, @NonNull String password) {
         String normalizedEmail = normalizeEmail(email);
@@ -44,7 +45,7 @@ public class UserService {
             return Result.failure("User with email address " + normalizedEmail + " already exists.");
         }
 
-        String newId = generatedUserId();
+        int newId = generateUserId();
         String hashedPassword = hashPassword(password);
         User newUser = new User(newId, fullName, normalizedEmail, hashedPassword);
         users.add(newUser);
@@ -76,7 +77,7 @@ public class UserService {
             log.warn("User {} is already logged in.", normalizedEmail);
             return Result.failure(user.getFullName() + " is already logged in.");
         } else {
-            user.setLoggedIn(true);
+            user.logIn();
             log.info("User {} successfully logged in.", normalizedEmail);
             return Result.success(user.getFullName() + " successfully logged in.");
         }
@@ -87,12 +88,40 @@ public class UserService {
 
         if (!user.isLoggedIn()) {
             log.warn("User {} is not logged in.", user.getEmail());
-            return Result.failure(user.getFullName() + " is not logged in.");
+            return Result.failure("Cannot log out – user is not logged in.");
         }
 
-        user.setLoggedIn(false);
+        user.logOut();
         log.info("User {} successfully logged out.", user.getEmail());
-        return Result.success(user.getFullName() + " has been logged out successfully.");
+        return Result.success("You have been logged out.");
+    }
+
+    public Result deleteUser(User user) {
+        if (user == null) {
+            return Result.failure("User cannot be null.");
+        }
+
+        log.info("Attempting to delete user: {}", user.getEmail());
+
+        if (!user.isLoggedIn()) {
+            log.warn("User {} is not logged in. Cannot delete account.", user.getEmail());
+            return Result.failure(user.getFullName() + " must be logged in to delete the account.");
+        }
+
+        if (!user.getBorrowedBooks().isEmpty()) {
+            log.warn("User {} cannot be deleted: {} books are currently borrowed and must be returned first.",
+                    user.getEmail(), user.getBorrowedBooks().size());
+            return Result.failure(
+                    "Cannot deleted account. You still have " +  user.getBorrowedBooks().size() + " borrowed books.");
+        }
+
+        Integer userId = user.getUserId();
+
+        user.logOut();
+        users.removeIf(u -> u.getUserId().equals(userId));
+
+        log.info("User {}  (ID {}) successfully deleted.", user.getEmail(), userId);
+        return Result.success("Account for " + user.getFullName() + " has been successfully deleted.");
     }
 
     public Boolean canBorrowBook(@NonNull User user) {
@@ -159,10 +188,8 @@ public class UserService {
         }
     }
 
-    private @NonNull String generatedUserId() {
-        String id = UUID.randomUUID().toString();
-        log.info("Generated new user ID: {}", id);
-        return id;
+    private int generateUserId() {
+        return COUNTER.getAndIncrement();
     }
 
     public Optional<User> getUserByEmail(@NonNull String email) {

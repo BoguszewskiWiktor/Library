@@ -240,4 +240,22 @@ public class LibraryServiceTest {
         Assertions.assertThrows(
                 NullPointerException.class, () -> libraryService.getUserBorrowedBooks(null));
     }
+
+    @Test
+    void getBooks_shouldReturnAllBooks() {
+        // given
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
+        bookService.addBook("The Pragmatic Programmer", "Andrew Hunt", 1999, "Addison-Wesley");
+
+        // when
+        int size = libraryService.getBooks().size();
+        List<Book> books = libraryService.getBooks();
+
+        // then
+        Assertions.assertEquals(size, books.size());
+        Assertions.assertEquals(books.get(0).getTitle(), bookService.getBooks().get(0).getTitle());
+        Assertions.assertEquals(books.get(1).getTitle(), bookService.getBooks().get(1).getTitle());
+        Assertions.assertEquals(books.get(2).getTitle(), bookService.getBooks().get(2).getTitle());
+    }
 }

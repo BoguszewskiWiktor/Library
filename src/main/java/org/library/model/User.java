@@ -10,7 +10,7 @@ import java.util.List;
 @ToString(exclude = {"borrowedBooks"})
 @RequiredArgsConstructor
 public class User {
-    private String userId;
+    private Integer userId;
     @NonNull
     private String fullName;
     @NonNull
@@ -19,7 +19,7 @@ public class User {
     private List<Book> borrowedBooks = new ArrayList<>();
     private Boolean loggedIn = false;
 
-    public User(String userId, @NonNull String fullName, @NonNull String email, String password) {
+    public User(int userId, @NonNull String fullName, @NonNull String email, String password) {
         this.userId = userId;
         this.fullName = fullName;
         this.email = email;
@@ -28,6 +28,14 @@ public class User {
 
     public Boolean isLoggedIn() {
         return loggedIn;
+    }
+
+    public void logIn() {
+        loggedIn = true;
+    }
+
+    public void logOut() {
+        loggedIn = false;
     }
 
     public Boolean hasBorrowed(Book book) {

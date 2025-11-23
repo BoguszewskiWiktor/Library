@@ -7,6 +7,8 @@ import org.library.model.Book;
 import org.library.model.User;
 import org.library.util.Result;
 
+import java.util.Optional;
+
 public class UserServiceTest {
 
     private UserService userService;
@@ -210,14 +212,14 @@ public class UserServiceTest {
     void logoutUser_shouldFailWhenUserNotLoggedIn() {
         // given
         User user = new User(
-                "1", "Andrzej Kowalski", "andrzej.kowalski@email.com", "Password");
+                1, "Andrzej Kowalski", "andrzej.kowalski@email.com", "Password");
 
         // when
         Result result = userService.logoutUser(user);
 
         // then
         Assertions.assertFalse(result.getSuccess());
-        Assertions.assertEquals(user.getFullName() + " is not logged in.", result.getMessage());
+        Assertions.assertEquals("Cannot log out – user is not logged in.", result.getMessage());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -234,14 +236,82 @@ public class UserServiceTest {
 
         // then
         Assertions.assertTrue(result.getSuccess());
-        Assertions.assertEquals(user.getFullName() + " has been logged out successfully.",  result.getMessage());
+        Assertions.assertEquals("You have been logged out.",  result.getMessage());
+    }
+
+    @Test
+    void deleteUser_shouldFailWhenUserIsNull() {
+        // given, when
+        Result result = userService.deleteUser(null);
+
+        // then
+        Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals("User cannot be null.", result.getMessage());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Test
+    void deleteUser_shouldFailWhenUserIsNotLoggedIn() {
+        // given
+        userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
+        User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
+
+        // when
+        Result result = userService.deleteUser(user);
+
+        // then
+        Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals(user.getFullName() + " must be logged in to delete the account.",
+                result.getMessage());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Test
+    void deleteUser_shouldFailWhenUserHasBorrowedBooks() {
+        // given
+        BookService bookService = new BookService();
+        userService.registerUser("andrzej.kowalski@gmail.com", "Andrzej Kowalski", "Password");
+        User user = userService.getUserByEmail("andrzej.kowalski@gmail.com").get();
+        bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
+        Book book = bookService.getBooks().getFirst();
+        user.logIn();
+        user.borrowBook(book);
+
+        // when
+        Result result = userService.deleteUser(user);
+
+        // then
+        Assertions.assertFalse(result.getSuccess());
+        Assertions.assertEquals(
+                "Cannot deleted account. You still have " +  user.getBorrowedBooks().size() + " borrowed books.",
+                result.getMessage());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Test
+    void deleteUser_shouldSuccessWhenUserHasNotBorrowedBooks() {
+        // given
+        userService.registerUser("andrzej.kowalski@gmail.com", "Andrzej Kowalski", "Password");
+        userService.registerUser("john.doe@example.com", "John Doe", "password123");
+        User user = userService.getUserByEmail("andrzej.kowalski@gmail.com").get();
+        user.logIn();
+
+        // when
+        Result result = userService.deleteUser(user);
+
+        // then
+        Optional<User> optionalUser = userService.getUserByEmail("andrzej.kowalski@gmail.com").stream().findFirst();
+        Assertions.assertTrue(result.getSuccess());
+        Assertions.assertEquals("Account for " + user.getFullName() + " has been successfully deleted.",
+                result.getMessage());
+        Assertions.assertEquals(Optional.empty(), optionalUser);
     }
 
     @Test
     void canBorrowBook_shouldReturnFalseWhenUserNotCorrect() {
         // given
         User user = new User(
-                "1", "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
+                1, "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
 
         // when
         Boolean canBorrowBook = userService.canBorrowBook(user);
@@ -279,7 +349,7 @@ public class UserServiceTest {
         bookService.addBook("Design Patterns", "Erich Gamma", 1994, "Addison-Wesley");
 
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
-        user.setLoggedIn(true);
+        user.logIn();
         libraryService.borrowBook(user, bookService.getBooks().getFirst());
         libraryService.borrowBook(user, bookService.getBooks().get(1));
         libraryService.borrowBook(user, bookService.getBooks().get(2));
@@ -299,7 +369,7 @@ public class UserServiceTest {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
-        user.setLoggedIn(true);
+        user.logIn();
 
         // when
         Boolean canBorrowBook = userService.canBorrowBook(user);
@@ -311,7 +381,7 @@ public class UserServiceTest {
     @Test
     void canReturnBook_canReturnBook_shouldReturnFalseWhenUserNotCorrect() {
         // given
-        User user = new User("1", "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
+        User user = new User(1, "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
         Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
         // when
@@ -342,7 +412,7 @@ public class UserServiceTest {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
-        user.setLoggedIn(true);
+        user.logIn();
         Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
         // when
@@ -358,7 +428,7 @@ public class UserServiceTest {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
-        user.setLoggedIn(true);
+        user.logIn();
         Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         user.borrowBook(book);
 
