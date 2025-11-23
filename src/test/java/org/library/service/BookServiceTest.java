@@ -19,9 +19,8 @@ public class BookServiceTest {
         bookService = new BookService();
     }
 
-    // addBook()
     @Test
-    void shouldAddBookSuccessfully() {
+    void addBook_shouldAddBookSuccessfully() {
         // given, when
         Result addBook = bookService.addBook(
                 "Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
@@ -33,7 +32,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldFailWhenTitleIsBlank() {
+    void addBook_shouldFailWhenTitleIsBlank() {
         // given, when
         Result addBook = bookService.addBook("", "Robert C. Martin", 2008, "Prentice Hall");
 
@@ -43,7 +42,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldFailWhenAuthorIsBlank() {
+    void addBook_shouldFailWhenAuthorIsBlank() {
         // given, when
         Result addBook = bookService.addBook("Clean Code", "", 2008, "Prentice Hall");
 
@@ -53,7 +52,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldFailWhenPublisherIsBlank() {
+    void addBook_shouldFailWhenPublisherIsBlank() {
         // given, when
         Result addBook = bookService.addBook("Clean Code", "Robert C. Martin", 2008, "");
 
@@ -63,7 +62,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldHandleDuplicateAvailableBooks() {
+    void addBook_shouldHandleDuplicateAvailableBooks() {
         // given, when
         Result firstAdd = bookService.addBook
                 ("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
@@ -78,7 +77,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldIncrementBookIdAutomatically() {
+    void addBook_shouldIncrementBookIdAutomatically() {
         // given, when
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
@@ -89,9 +88,8 @@ public class BookServiceTest {
                 bookService.getBooks().stream().map(Book::getBookID).toList());
     }
 
-    // listAvailableBooks()
     @Test
-    void shouldReturnOnlyAvailableBooks() {
+    void listAvailableBooks_shouldReturnOnlyAvailableBooks() {
         // given
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
@@ -108,7 +106,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoAvailableBooks() {
+    void listAvailableBooks_shouldReturnEmptyListWhenNoAvailableBooks() {
         // given
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         bookService.addBook("Effective Java", "Joshua Bloch", 2018, "Addison-Wesley");
@@ -123,9 +121,8 @@ public class BookServiceTest {
         Assertions.assertTrue(availableBooks.isEmpty());
     }
 
-    // searchBookByTitle()
     @Test
-    void shouldFindBooksByTitleIgnoringCase() {
+    void searchBookByTitle_shouldFindBooksByTitleIgnoringCase() {
         // given
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
@@ -145,7 +142,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoBooksFound() {
+    void searchBookByTitle_shouldReturnEmptyListWhenNoBooksFound() {
         // when
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
@@ -156,9 +153,8 @@ public class BookServiceTest {
         Assertions.assertEquals(0, books.size());
     }
 
-    // isBookAvailable(Book book)
     @Test
-    void shouldReturnTrueWhenBookExistAndIsAvailable() {
+    void isBookAvailable_shouldReturnTrueWhenBookExistAndIsAvailable() {
         // given
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         Book book = bookService.getBooks().getFirst();
@@ -172,7 +168,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldReturnFalseWhenBookIsBorrowed() {
+    void isBookAvailable_shouldReturnFalseWhenBookIsBorrowed() {
         // given
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         Book book = bookService.getBooks().getFirst();
@@ -186,7 +182,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldReturnFalseWhenBookNotInSystem() {
+    void isBookAvailable_shouldReturnFalseWhenBookNotInSystem() {
         // given
         bookService.addBook("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
 
@@ -198,9 +194,8 @@ public class BookServiceTest {
         Assertions.assertFalse(bookAvailable);
     }
 
-    // isBookCorrect(Book book)
     @Test
-    void shouldReturnTrueWhenBookExists() {
+    void isBookCorrect_shouldReturnTrueWhenBookExists() {
         // given
         Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         book.setBookID(1L);
@@ -214,7 +209,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void shouldReturnFalseWhenBookNotExists() {
+    void isBookCorrect_shouldReturnFalseWhenBookNotExists() {
         // given
         Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
         book.setBookID(1L);

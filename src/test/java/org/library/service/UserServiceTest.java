@@ -16,17 +16,16 @@ public class UserServiceTest {
         userService = new UserService();
     }
 
-    // registerUser()
     @SuppressWarnings("DataFlowIssue")
     @Test
-    void shouldThrowNullPointerExceptionWhenEmailIsNull() {
+    void registerUser_shouldThrowNullPointerExceptionWhenEmailIsNull() {
         // given, when, then
         Assertions.assertThrows(NullPointerException.class,
                 () -> userService.registerUser(null, "Andrzej Kowalski", "Password"));
     }
 
     @Test
-    void shouldFailWhenEmailIsBlank() {
+    void registerUser_shouldFailWhenEmailIsBlank() {
         // given, when
         Result result = userService.registerUser("     ", "Andrzej Kowalski", "Password");
 
@@ -36,7 +35,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldFailWhenEmailIsInvalid() {
+    void registerUser_shouldFailWhenEmailIsInvalid() {
         // given, when
         Result result = userService.registerUser("123", "Andrzej Kowalski", "Password");
 
@@ -47,7 +46,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldTrimAndNormalizeEmail() {
+    void registerUser_shouldTrimAndNormalizeEmail() {
         // given, when
         Result result = userService.registerUser(
                 "     AndrzejK@email.com", "Andrzej Kowalski", "Password");
@@ -60,7 +59,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void duplicateDetectionShouldBeCaseInsensitive() {
+    void registerUser_duplicateDetectionShouldBeCaseInsensitive() {
         // given
         Result result1 = userService.registerUser(
                 "     AndrzejK@email.com", "Andrzej Kowalski", "Password1");
@@ -79,14 +78,14 @@ public class UserServiceTest {
 
     @SuppressWarnings("DataFlowIssue")
     @Test
-    void shouldThrowNullPointerExceptionWhenNameIsNull() {
+    void registerUser_shouldThrowNullPointerExceptionWhenNameIsNull() {
         // given, when, then
         Assertions.assertThrows(NullPointerException.class,
                 () -> userService.registerUser("randomEmail@email.com", null, "Password"));
     }
 
     @Test
-    void shouldFailWhenNameIsBlank() {
+    void registerUser_shouldFailWhenNameIsBlank() {
         // given, when
         Result result = userService.registerUser("randomEmail@email.com", "   ",  "Password");
 
@@ -96,7 +95,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldFailWhenFullNameDoesNotContainSpace() {
+    void registerUser_shouldFailWhenFullNameDoesNotContainSpace() {
         // given, when
         Result result = userService.registerUser("andrzej@email.com", "AndrzejKowalski", "Password");
 
@@ -109,7 +108,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldFailWhenPasswordTooShort() {
+    void registerUser_shouldFailWhenPasswordTooShort() {
         // given, when
         Result result = userService.registerUser("Andrzej@email.com", "Andrzej Kowalski", "Pass");
 
@@ -121,7 +120,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldFailWhenEmailAlreadyExists() {
+    void registerUser_shouldFailWhenEmailAlreadyExists() {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -139,7 +138,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldSuccessWhenGivenValidInput() {
+    void registerUser_shouldSuccessWhenGivenValidInput() {
         // given, when
         Result result = userService.registerUser(
                 "andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
@@ -151,9 +150,8 @@ public class UserServiceTest {
                 result.getMessage());
     }
 
-    // loginUser()
     @Test
-    void shouldFailWhenEmailNotFound() {
+    void loginUser_shouldFailWhenEmailNotFound() {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
 
@@ -165,7 +163,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldFailWhenPasswordIncorrect() {
+    void loginUser_shouldFailWhenPasswordIncorrect() {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
 
@@ -179,7 +177,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldFailWhenUserAlreadyLoggedIn() {
+    void loginUser_shouldFailWhenUserAlreadyLoggedIn() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -195,7 +193,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldSuccessWhenCorrectCredentials() {
+    void loginUser_shouldSuccessWhenCorrectCredentials() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -208,9 +206,8 @@ public class UserServiceTest {
         Assertions.assertEquals(user.getFullName() + " successfully logged in.", result.getMessage());
     }
 
-    // logoutUser()
     @Test
-    void shouldFailWhenUserNotLoggedIn() {
+    void logoutUser_shouldFailWhenUserNotLoggedIn() {
         // given
         User user = new User(
                 "1", "Andrzej Kowalski", "andrzej.kowalski@email.com", "Password");
@@ -225,7 +222,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldSuccessWhenUserLoggedIn() {
+    void logoutUser_shouldSuccessWhenUserLoggedIn() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         userService.loginUser("andrzej.kowalski@email.com", "Password");
@@ -240,9 +237,8 @@ public class UserServiceTest {
         Assertions.assertEquals(user.getFullName() + " has been logged out successfully.",  result.getMessage());
     }
 
-    // canBorrowBook()
     @Test
-    void shouldReturnFalseWhenUserNotCorrect() {
+    void canBorrowBook_shouldReturnFalseWhenUserNotCorrect() {
         // given
         User user = new User(
                 "1", "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
@@ -256,7 +252,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldReturnFalseWhenUserNotLoggedIn() {
+    void canBorrowBook_shouldReturnFalseWhenUserNotLoggedIn() {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -270,7 +266,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldReturnFalseWhenBorrowLimitExceeded() {
+    void canBorrowBook_shouldReturnFalseWhenBorrowLimitExceeded() {
         // given
         BookService bookService = new BookService();
         LibraryService libraryService = new LibraryService(userService, bookService);
@@ -299,7 +295,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void shouldReturnTrueWhenAllOkey() {
+    void canBorrowBook_shouldReturnTrueWhenAllOkey() {
         // given
         userService.registerUser("andrzej.kowalski@email.com", "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -312,9 +308,8 @@ public class UserServiceTest {
         Assertions.assertTrue(canBorrowBook);
     }
 
-    // canReturnBook()
     @Test
-    void canReturnBook_shouldReturnFalseWhenUserNotCorrect() {
+    void canReturnBook_canReturnBook_shouldReturnFalseWhenUserNotCorrect() {
         // given
         User user = new User("1", "Andrzej Kowalski", "andrzej.kowalski.email.com", "Password");
         Book book = new Book("Clean Code", "Robert C. Martin", 2008, "Prentice Hall");
@@ -328,7 +323,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void canReturnBook_shouldReturnFalseWhenUserNotLoggedIn() {
+    void canReturnBook_canReturnBook_shouldReturnFalseWhenUserNotLoggedIn() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -343,7 +338,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void canReturnBook_shouldReturnFalseWhenBookNotBorrowed() {
+    void canReturnBook_canReturnBook_shouldReturnFalseWhenBookNotBorrowed() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
@@ -359,7 +354,7 @@ public class UserServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    void canReturnBook_shouldReturnTrueWhenAllOkey() {
+    void canReturnBook_canReturnBook_shouldReturnTrueWhenAllOkey() {
         // given
         userService.registerUser("andrzej.kowalski@email.com",  "Andrzej Kowalski", "Password");
         User user = userService.getUserByEmail("andrzej.kowalski@email.com").get();
