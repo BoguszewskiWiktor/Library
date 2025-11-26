@@ -19,12 +19,19 @@ public class User {
     private List<Book> borrowedBooks = new ArrayList<>();
     private Boolean loggedIn = false;
 
-    public User(int userId, @NonNull String fullName, @NonNull String email, String password) {
+    public User(@NonNull String fullName, @NonNull String email, String password) {
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+    }
+
+    public User(Integer userId, @NonNull String fullName, @NonNull String email, String password) {
         this.userId = userId;
         this.fullName = fullName;
         this.email = email;
         this.password = password;
     }
+
 
     public Boolean isLoggedIn() {
         return loggedIn;

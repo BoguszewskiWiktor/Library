@@ -45,7 +45,7 @@ public class LibraryService {
         Result validation = validateBorrowInputs(user, book);
         if (validation != null) return validation;
 
-        if (!bookService.isBookCorrect(book)) {
+        if (bookService.searchBookByTitle(book.getTitle()).isEmpty()) {
             log.error("Book {} not found in system during return attempt", book.getTitle());
             return Result.failure("Book is not found in system.");
         }
@@ -69,7 +69,7 @@ public class LibraryService {
 
     public List<Book> getBooks() {
         log.debug("Fetching all books from the library");
-        return bookService.getBooks();
+        return bookService.listAllBooks();
     }
 
     private Result validateBorrowInputs(User user, Book book) {

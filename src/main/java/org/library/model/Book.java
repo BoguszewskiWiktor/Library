@@ -1,14 +1,12 @@
 package org.library.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
 @EqualsAndHashCode(exclude = {"bookID", "status"})
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class Book {
     private Long bookID;
