@@ -11,10 +11,10 @@ import java.util.Optional;
 public class UserRepository implements UserRepositoryInterface {
     @Override
     public User save(User user) {
-        String sql = "INSERT INTO users (fullName, email, password) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (full_Name, email, password) VALUES (?, ?, ?)";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
 
             statement.setString(1, user.getFullName());
@@ -28,7 +28,7 @@ public class UserRepository implements UserRepositoryInterface {
 
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 if (keys.next()) {
-                    user.setUserId(keys.getInt(1));
+                    user.setUserId(keys.getLong(1));
                 }
             }
 
@@ -40,14 +40,14 @@ public class UserRepository implements UserRepositoryInterface {
     }
 
     @Override
-    public Optional<User> findById(Integer id) {
+    public Optional<User> findById(Long id) {
         String query = "SELECT * FROM users WHERE user_id = ?";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
 
-            statement.setInt(1, id);
+            statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
@@ -66,7 +66,7 @@ public class UserRepository implements UserRepositoryInterface {
         String query = "SELECT * FROM users WHERE email = ?";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
 
             statement.setString(1, email);
@@ -105,13 +105,13 @@ public class UserRepository implements UserRepositoryInterface {
     }
 
     @Override
-    public Boolean delete(Integer id) {
+    public Boolean delete(Long id) {
         String query = "DELETE FROM users WHERE user_id = ?";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
-            statement.setInt(1, id);
+            statement.setLong(1, id);
 
             return statement.executeUpdate() == 1;
 
@@ -124,17 +124,17 @@ public class UserRepository implements UserRepositoryInterface {
     public Boolean update(User user) {
         String query = """
                 UPDATE users
-                SET fullName = ?, email = ?, password = ?
-                WHERE id = ?
+                SET full_name = ?, email = ?, password = ?
+                WHERE users.user_id = ?
                 """;
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
             statement.setString(1, user.getFullName());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getPassword());
-            statement.setInt(4, user.getUserId());
+            statement.setLong(4, user.getUserId());
 
             return statement.executeUpdate() == 1;
 
@@ -145,7 +145,7 @@ public class UserRepository implements UserRepositoryInterface {
 
     private User mapResultSetToUser(ResultSet resultSet) throws SQLException {
         return new User(
-                resultSet.getInt("user_id"),
+                resultSet.getLong("user_id"),
                 resultSet.getString("fullName"),
                 resultSet.getString("email"),
                 resultSet.getString("password")

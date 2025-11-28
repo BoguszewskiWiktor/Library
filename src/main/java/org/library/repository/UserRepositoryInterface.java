@@ -8,13 +8,13 @@ import java.util.Optional;
 public interface UserRepositoryInterface {
     User save(User user);
 
-    Optional<User> findById(Integer id);
+    Optional<User> findById(Long id);
 
     Optional<User> findByEmail(String email);
 
     List<User> findAll();
 
-    Boolean delete(Integer id);
+    Boolean delete(Long id);
 
     Boolean update(User user);
 }

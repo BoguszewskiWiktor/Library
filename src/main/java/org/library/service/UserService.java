@@ -3,24 +3,20 @@ package org.library.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.library.model.Book;
 import org.library.model.User;
 import org.library.repository.UserRepository;
 import org.library.util.Result;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private static final int MAX_BORROW_LIMIT = 5;
+    private final LoanService loanService;
 
     public Result registerUser(@NonNull String email, @NonNull String fullName, @NonNull String password) {
         String normalizedEmail = normalizeEmail(email);
@@ -114,11 +110,12 @@ public class UserService {
             return Result.failure(user.getEmail() + " must be logged in to delete the account.");
         }
 
-        if (!user.getBorrowedBooks().isEmpty()) {
+        int activeLoans = loanService.countActiveLoans(user.getUserId());
+        if (activeLoans > 0) {
             log.warn("User {} cannot be deleted: {} books are currently borrowed and must be returned first.",
-                    user.getEmail(), user.getBorrowedBooks().size());
+                    user.getEmail(), activeLoans);
             return Result.failure(
-                    "Cannot delete account. You still have " + user.getBorrowedBooks().size() + " borrowed books.");
+                    "Cannot delete account. You still have " + activeLoans + " borrowed books.");
         }
 
         user.logOut();
@@ -128,58 +125,23 @@ public class UserService {
         return Result.success("Account for " + user.getFullName() + " has been successfully deleted.");
     }
 
-    public Boolean canBorrowBook(@NonNull User user) {
-        log.info("Checking if user {} can borrow book.", user.getEmail());
-
-        Optional<User> existingUser = getLoggedInUser(user);
-        if (existingUser.isEmpty()) return false;
-
-        if (!existingUser.get().isLoggedIn()) {
-            log.warn("User {} is not logged in.", existingUser.get().getEmail());
-            return false;
-        }
-
-        if (existingUser.get().getBorrowedBooks().size() >= MAX_BORROW_LIMIT) {
-            log.warn("User {} has too many borrowed books.", existingUser.get().getEmail());
-            return false;
-        }
-
-        log.info("User {} can borrow book", existingUser.get().getEmail());
-        return true;
-    }
-
-    public Boolean canReturnBook(@NonNull User user, @NonNull Book book) {
-        log.info("Checking if user {} can return book.", user.getEmail());
-
-        Optional<User> existingUser = getLoggedInUser(user);
-        if (existingUser.isEmpty()) return false;
-
-        if (!existingUser.get().hasBorrowed(book)) {
-            log.warn("User {} has not borrowed book {}.", existingUser.get().getEmail(), book.getTitle());
-            return false;
-        }
-
-        log.info("User {} can return book {}.", existingUser.get().getEmail(), book.getTitle());
-        return true;
-    }
-
     private Optional<User> getLoggedInUser(User user) {
         String normalizedEmail = normalizeEmail(user.getEmail());
+        log.info("Attempting to get logged in user: {}", normalizedEmail);
 
-        Optional<User> existing = userRepository.findByEmail(normalizedEmail);
-        if (existing.isEmpty()) {
+        Optional<User> existingUser = userRepository.findByEmail(normalizedEmail);
+        if (existingUser.isEmpty()) {
             log.error("Account with email {} does not exist.", normalizedEmail);
             return Optional.empty();
         }
 
-        User existingUser = existing.get();
-
-        if (!existingUser.isLoggedIn()) {
+        if (!existingUser.get().isLoggedIn()) {
             log.warn("User {} is not logged in.", normalizedEmail);
             return Optional.empty();
         }
 
-        return Optional.of(existingUser);
+        log.info("User {} is  logged in.", normalizedEmail);
+        return existingUser;
     }
 
     public String hashPassword(@NonNull String password) {

@@ -10,7 +10,7 @@ import java.util.List;
 @ToString(exclude = {"borrowedBooks"})
 @RequiredArgsConstructor
 public class User {
-    private Integer userId;
+    private Long userId;
     @NonNull
     private String fullName;
     @NonNull
@@ -25,7 +25,7 @@ public class User {
         this.password = password;
     }
 
-    public User(Integer userId, @NonNull String fullName, @NonNull String email, String password) {
+    public User(Long userId, @NonNull String fullName, @NonNull String email, String password) {
         this.userId = userId;
         this.fullName = fullName;
         this.email = email;

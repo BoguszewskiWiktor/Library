@@ -17,7 +17,7 @@ public class BookRepository implements BookRepositoryInterface {
         String query = "INSERT INTO books (title, author, year, publisher, status) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
 
             statement.setString(1, book.getTitle());
@@ -56,7 +56,6 @@ public class BookRepository implements BookRepositoryInterface {
                     return Optional.of(mapResultSetToBook(resultSet));
                 }
                 return Optional.empty();
-
             }
 
         } catch (SQLException e) {
@@ -112,7 +111,7 @@ public class BookRepository implements BookRepositoryInterface {
         List<Book> books = new ArrayList<>();
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
             statement.setString(1, title);
 
@@ -137,7 +136,7 @@ public class BookRepository implements BookRepositoryInterface {
                 WHERE id = ?
                 """;
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
 
             statement.setString(1, book.getTitle());
@@ -159,7 +158,7 @@ public class BookRepository implements BookRepositoryInterface {
         String query = "UPDATE books SET status = ? WHERE book_id = ?";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
 
             statement.setString(1, status.name());
@@ -176,7 +175,7 @@ public class BookRepository implements BookRepositoryInterface {
         String query = "DELETE FROM books WHERE book_id = ?";
 
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
+             PreparedStatement statement = connection.prepareStatement(query)
         ) {
 
             statement.setLong(1, id);
